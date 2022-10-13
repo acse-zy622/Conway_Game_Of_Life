@@ -1,6 +1,7 @@
 """Implementations of Lorenz 96 and Conway's
 Game of Life on various meshes"""
 
+from re import X
 import numpy as np
 import scipy
 import matplotlib.pyplot as plt
@@ -8,54 +9,52 @@ from matplotlib.patches import Polygon
 
 
 def lorenz96(initial_state, nsteps):
-    """
-    Perform iterations of the Lorenz 96 update.
+    
+    X=np.array(initial_state)
+    i=1
+    
+    while i <= nsteps:
+        
+        X1=np.roll(X,2)
+        X2=np.roll(X,-1)
+        X3=np.roll(X,1)
+        
+        
+        X=(100*X+((X1-X2)*X3)+8)/101
+        
+        i+=1
+        
+    return X
 
-    Parameters
-    ----------
-    initial_state : array_like or list
-        Initial state of lattice in an array of floats.
-    nsteps : int
-        Number of steps of Lorenz 96 to perform.
+    
+    def life(initial_state, nsteps):
 
-    Returns
-    -------
+    
+        i=1
+        cells=initial_state
+    
+        while i <= nsteps:
 
-    numpy.ndarray
-         Final state of lattice in array of floats
+            update_cells=np.zeros((cells.shape[0],cells.shape[1]))
 
-    >>> x = lorenz96([8.0, 8.0, 8.0], 1)
-    >>> print(x)
-    array([8.0, 8.0, 8.0])
+            for row,col in np.ndindex(cells.shape):
 
-    >>> lorenz96([False, False, True, False, False], 3)
-    array([True, False, True, True, True])
+    
+                sums= np.sum(cells[row-1:row+2,col-1:col+2])-cells[row,col]
+    
+                if cells[row,col]==1:
+                    if sums>=2 and sums<=3:
+                        update_cells[row,col]=1
+            
+                if cells[row,col]==0:
+                    if sums==3:
+                        update_cells[row,col]=1
+                
+            cells= update_cells
 
-    # write your code here to replace return statement
-    return NotImplemented
-    """
-
-    # write your code here to replace this return statement
-    return NotImplemented
-
-
-def life(initial_state, nsteps):
-    """
-    Perform iterations of Conway’s Game of Life.
-    Parameters
-    ----------
-    initial_state : array_like or list of lists
-        Initial 2d state of grid in an array of booleans.
-    nsteps : int
-        Number of steps of Life to perform.
-    Returns
-    -------
-    numpy.ndarray
-         Final state of grid in array of booleans
-    """
-
-    # write your code here to replace return statement
-    return NotImplemented
+            i+=1
+        
+        return cells
 
 
 def life_periodic(initial_state, nsteps):
