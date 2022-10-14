@@ -1,11 +1,11 @@
 """Implementations of Lorenz 96 and Conway's
 Game of Life on various meshes"""
 
-from re import X
+# from re import X
 import numpy as np
-import scipy
+# import scipy
 import matplotlib.pyplot as plt
-from matplotlib.patches import Polygon
+# from matplotlib.patches import Polygon
 
 
 def lorenz96(initial_state, nsteps):
@@ -34,15 +34,16 @@ def lorenz96(initial_state, nsteps):
         X2 = np.roll(x, -1)
         X3 = np.roll(x, 1)
         x = (100*x + ((X1 - X2) * X3) + 8) / 101
-        i += 1 
+        i += 1
     return x
+
 
 def sums_table(initial_state):
     x = np.array(initial_state*1)
     x_down = np.roll(x, 1, axis=0)
     x_down[0:1, :] = 0
     x_up = np.roll(x, -1, axis=0)
-    x_up[x_up.shape[0] - 1:x_up.shape[0], :]=0
+    x_up[x_up.shape[0] - 1:x_up.shape[0], :] = 0
 
     y = x + x_up + x_down
 
@@ -54,7 +55,8 @@ def sums_table(initial_state):
     sums = y + y_left + y_right - x
     return sums
 
-def life(initial_state, nsteps) :
+
+def life(initial_state, nsteps):
     """
     Perform iterations of Conway’s Game of Life.
     Parameters
@@ -75,10 +77,10 @@ def life(initial_state, nsteps) :
         sums = sums_table(x)
         update_x[(x == 0) & (sums == 3)] = 1
         update_x[(x == 1) & (2 <= sums) & (3 >= sums)] = 1
-        
         x = update_x
         i += 1
     return x.astype(bool)
+
 
 def sums_table1(initial_state):
     x = np.array(initial_state*1)
@@ -87,7 +89,7 @@ def sums_table1(initial_state):
     y = x + x_up + x_down
     y_right = np.roll(y, 1, axis=1)
     y_left = np.roll(y, -1, axis=1)
-    sums=y + y_left + y_right - x
+    sums = y + y_left + y_right - x
     return sums
 
 
@@ -106,33 +108,29 @@ def life_periodic(initial_state, nsteps):
     Final state of grid in array of booleans
     """
 
-    i=1
-    x=np.array(initial_state*1)
-    
-    while i<= nsteps:
-        update_x=np.zeros((x.shape[0],x.shape[1]))
-        sums=sums_table1(x)
-        update_x[(x==0)&(sums==3)]=1
-        update_x[(x==1)&(2<=sums)&(3>=sums)]=1
-        
-        x=update_x
-        i+=1
-        
-    return x.astype(bool)
+    i = 1
+    x = np.array(initial_state*1)
+    while i <= nsteps:
+        update_x = np.zeros((x.shape[0], x.shape[1]))
+        sums = sums_table1(x)
+        update_x[(x == 0) & (sums == 3)] = 1
+        update_x[(x == 1) & (2 <= sums) & (3 >= sums)] = 1
+        x = update_x
+        i += 1
 
+    return x.astype(bool)
 
 
 def sums_table2(initial_state):
 
-    x=np.array(initial_state)
-    x[x==-1]=1
-    x_down= np.roll(x,1,axis = 0)
-    x_up = np.roll(x,-1,axis = 0)
-    y=x+x_up+x_down
-    y_right = np.roll(y,1,axis=1)
-    y_left = np.roll(y,-1,axis=1)
-    sums=y+y_left+y_right-x
-    
+    x = np.array(initial_state)
+    x[x == -1] = 1
+    x_down = np.roll(x, 1, axis=0)
+    x_up = np.roll(x, -1, axis=0)
+    y = x + x_up + x_down
+    y_right = np.roll(y, 1, axis=1)
+    y_left = np.roll(y, -1, axis=1)
+    sums = y + y_left + y_right - x
     return sums
 
 
@@ -152,24 +150,50 @@ def life2colour(initial_state, nsteps):
     numpy.ndarray
     Final state of grid in array of ints of value -1, 0, or 1.
     """
-    i=1
-    x=np.array(initial_state)
-    while i<= nsteps:
-        update_x= x.copy()
-        sums=sums_table2(x)
-        sums1=sums_table1(x)
-        update_x[(x==-1)&(sums!=3)&(sums!=2)]=0
-        update_x[(x== 1)&(sums!=3)&(sums!=2)]=0
-        update_x[(x==0)&(sums==3)&(sums1>=0)]=1
-        update_x[(x==0)&(sums==3)&(sums1<0)]=-1
-        
-        
-        x=update_x
-        i+=1
-        
+    i = 1
+    x = np.array(initial_state)
+    while i <= nsteps:
+        update_x = x.copy()
+        sums = sums_table2(x)
+        sums1 = sums_table1(x)
+        update_x[(x == -1) & (sums != 3) & (sums != 2)] = 0
+        update_x[(x == 1) & (sums != 3) & (sums != 2)] = 0
+        update_x[(x == 0) & (sums == 3) & (sums1 >= 0)] = 1
+        update_x[(x == 0) & (sums == 3) & (sums1 < 0)] = -1
+        x = update_x
+        i += 1
+
     return x
 
-    
+
+def sums_table3(initial_state):
+
+    x = np.array(initial_state*1)
+    x_down = np.roll(x, 1, axis=0)
+    x_down[0:1, :] = 0
+    x_up = np.roll(x, -1, axis=0)
+    x_up[x_up.shape[0] - 1:x_up.shape[0], :] = 0
+    y = x + x_up + x_down
+    y_right = np.roll(y, 1, axis=1)
+    y_right[:, 0:1] = 0
+    y_left = np.roll(y, -1, axis=1)
+    y_left[:, y_left.shape[1] - 1:y_left.shape[1]] = 0
+    sums = y + y_left + y_right - x
+    sums1 = np.pad(sums, 1)
+    x1 = np.pad(x, 1)
+
+    for row, col in np.ndindex(x.shape):
+
+        if (row % 2 == 0) & (col % 2 == 0):
+            sums1[row+1, col+1] -= x1[1+row+1, 1+col+1]
+        if (row % 2 == 0) & (col % 2 != 0):
+            sums1[row+1, col+1] -= x1[1+row-1, 1+1+col]
+        if (row % 2 != 0) & (col % 2 == 0):
+            sums1[row+1, col+1] -= x1[1+row+1, 1+col-1]
+        if (row % 2 != 0) & (col % 2 != 0):
+            sums1[row+1, col+1] -= x1[1+row-1, 1+col-1]
+
+    return sums1[1:-1, 1:-1]
 
 
 def lifepent(initial_state, nsteps):
@@ -192,7 +216,17 @@ def lifepent(initial_state, nsteps):
     """
 
     # write your code here to replace return this statement
-    return NotImplemented
+    i = 1
+    x = np.array(initial_state*1)
+    while i <= nsteps:
+        update_x = np.zeros((x.shape[0], x.shape[1]))
+        sums = sums_table3(x)
+        update_x[(x == 0) & ((sums == 3) | (sums == 4) | (sums == 6))] = 1
+        update_x[(x == 1) & (2 <= sums) & (3 >= sums)] = 1
+        x = update_x
+        i += 1
+    return x.astype(bool)
+
 
 # Remaining routines are for plotting
 
