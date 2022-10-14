@@ -27,7 +27,7 @@ def lorenz96(initial_state, nsteps):
     >>> lorenz96([False, False, True, False, False], 3)
     array([True, False, True, True, True])
     """
-    x = np.array(initial_state)
+    x = np.array(initial_state*1)
     i = 1
     while i <= nsteps:
         X1 = np.roll(x, 2)
