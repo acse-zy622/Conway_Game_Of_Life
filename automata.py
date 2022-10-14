@@ -9,98 +9,167 @@ from matplotlib.patches import Polygon
 
 
 def lorenz96(initial_state, nsteps):
-    
-    X=np.array(initial_state)
-    i=1
-    
+    """
+    Perform iterations of the Lorenz 96 update.
+    Parameters
+    ----------
+    initial_state : array_like or list
+    Initial state of lattice in an array of floats.
+    nsteps : int
+    Number of steps of Lorenz 96 to perform.
+    Returns
+    -------
+    numpy.ndarray
+    Final state of lattice in array of floats
+    >>> x = lorenz96([8.0, 8.0, 8.0], 1)
+    >>> print(x)
+    array([8.0, 8.0, 8.0])
+    >>> lorenz96([False, False, True, False, False], 3)
+    array([True, False, True, True, True])
+    """
+    x = np.array(initial_state)
+    i = 1
     while i <= nsteps:
-        
-        X1=np.roll(X,2)
-        X2=np.roll(X,-1)
-        X3=np.roll(X,1)
-        
-        
-        X=(100*X+((X1-X2)*X3)+8)/101
-        
-        i+=1
-        
-    return X
+        X1 = np.roll(x, 2)
+        X2 = np.roll(x, -1)
+        X3 = np.roll(x, 1)
+        x = (100*x + ((X1 - X2) * X3) + 8) / 101
+        i += 1 
+    return x
 
-    
-    def life(initial_state, nsteps):
+def sums_table(initial_state):
+    x = np.array(initial_state*1)
+    x_down = np.roll(x, 1, axis=0)
+    x_down[0:1, :] = 0
+    x_up = np.roll(x, -1, axis=0)
+    x_up[x_up.shape[0] - 1:x_up.shape[0], :]=0
 
-    
-        i=1
-        cells=initial_state
-    
-        while i <= nsteps:
+    y = x + x_up + x_down
 
-            update_cells=np.zeros((cells.shape[0],cells.shape[1]))
+    y_right = np.roll(y, 1, axis=1)
+    y_right[:, 0:1] = 0
+    y_left = np.roll(y, -1, axis=1)
+    y_left[:, y_left.shape[1]-1:y_left.shape[1]] = 0
 
-            for row,col in np.ndindex(cells.shape):
+    sums = y + y_left + y_right - x
+    return sums
 
-    
-                sums= np.sum(cells[row-1:row+2,col-1:col+2])-cells[row,col]
-    
-                if cells[row,col]==1:
-                    if sums>=2 and sums<=3:
-                        update_cells[row,col]=1
-            
-                if cells[row,col]==0:
-                    if sums==3:
-                        update_cells[row,col]=1
-                
-            cells= update_cells
-
-            i+=1
+def life(initial_state, nsteps) :
+    """
+    Perform iterations of Conway’s Game of Life.
+    Parameters
+    ----------
+    initial_state : array_like or list of lists
+    Initial 2d state of grid in an array of booleans.
+    nsteps : int
+    Number of steps of Life to perform.
+    Returns
+    -------
+    numpy.ndarray
+    Final state of grid in array of booleans
+    """
+    i = 1
+    x = np.array(initial_state*1)
+    while i <= nsteps:
+        update_x = np.zeros((x.shape[0], x.shape[1]))
+        sums = sums_table(x)
+        update_x[(x == 0) & (sums == 3)] = 1
+        update_x[(x == 1) & (2 <= sums) & (3 >= sums)] = 1
         
-        return cells
+        x = update_x
+        i += 1
+    return x.astype(bool)
+
+def sums_table1(initial_state):
+    x = np.array(initial_state*1)
+    x_down = np.roll(x, 1, axis=0)
+    x_up = np.roll(x, -1, axis=0)
+    y = x + x_up + x_down
+    y_right = np.roll(y, 1, axis=1)
+    y_left = np.roll(y, -1, axis=1)
+    sums=y + y_left + y_right - x
+    return sums
 
 
 def life_periodic(initial_state, nsteps):
     """
-    Perform iterations of Conway's Game of Life on a doubly periodic mesh.
-
+    Perform iterations of Conway’s Game of Life on a doubly periodic mesh.
     Parameters
     ----------
     initial_state : array_like or list of lists
-        Initial 2d state of grid in an array of booleans.
+    Initial 2d state of grid in an array of booleans.
     nsteps : int
-        Number of steps of Life to perform.
-
+    Number of steps of Life to perform.
     Returns
     -------
-
     numpy.ndarray
-         Final state of grid in array of booleans
+    Final state of grid in array of booleans
     """
 
-    # write your code here to replace this return statement
-    return NotImplemented
+    i=1
+    x=np.array(initial_state*1)
+    
+    while i<= nsteps:
+        update_x=np.zeros((x.shape[0],x.shape[1]))
+        sums=sums_table1(x)
+        update_x[(x==0)&(sums==3)]=1
+        update_x[(x==1)&(2<=sums)&(3>=sums)]=1
+        
+        x=update_x
+        i+=1
+        
+    return x.astype(bool)
+
+
+
+def sums_table2(initial_state):
+
+    x=np.array(initial_state)
+    x[x==-1]=1
+    x_down= np.roll(x,1,axis = 0)
+    x_up = np.roll(x,-1,axis = 0)
+    y=x+x_up+x_down
+    y_right = np.roll(y,1,axis=1)
+    y_left = np.roll(y,-1,axis=1)
+    sums=y+y_left+y_right-x
+    
+    return sums
 
 
 def life2colour(initial_state, nsteps):
     """
-    Perform iterations of Conway's Game of Life on a doubly periodic mesh.
-
+    Perform iterations of Conway’s Game of Life on a doubly periodic mesh.
     Parameters
     ----------
     initial_state : array_like or list of lists
-        Initial 2d state of grid in an array ints with value -1, 0, or 1.
-        Values of -1 or 1 represent "on" cells of both colours. Zero
-        values are "off".
+    Initial 2d state of grid in an array ints with value -1, 0, or 1.
+    Values of -1 or 1 represent "on" cells of both colours. Zero
+    values are "off".
     nsteps : int
-        Number of steps of Life to perform.
-
+    Number of steps of Life to perform.
     Returns
     -------
-
     numpy.ndarray
-        Final state of grid in array of ints of value -1, 0, or 1.
+    Final state of grid in array of ints of value -1, 0, or 1.
     """
+    i=1
+    x=np.array(initial_state)
+    while i<= nsteps:
+        update_x= x.copy()
+        sums=sums_table2(x)
+        sums1=sums_table1(x)
+        update_x[(x==-1)&(sums!=3)&(sums!=2)]=0
+        update_x[(x== 1)&(sums!=3)&(sums!=2)]=0
+        update_x[(x==0)&(sums==3)&(sums1>=0)]=1
+        update_x[(x==0)&(sums==3)&(sums1<0)]=-1
+        
+        
+        x=update_x
+        i+=1
+        
+    return x
 
-    # write your code here to replace this return statement
-    return NotImplemented
+    
 
 
 def lifepent(initial_state, nsteps):
